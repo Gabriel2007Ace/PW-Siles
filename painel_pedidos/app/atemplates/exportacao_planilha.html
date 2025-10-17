@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Exportar Planilha - Divino Doces Finos ERP{% endblock %}
+
+{% block content %}
+    <div id="exportacao-planilha">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Exportar Pedidos para Planilha de Produção</h2>
+        
+        <form id="filter-form" class="space-y-6 mb-8 p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Filtrar Pedidos</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="filter-data-inicio" class="block text-sm font-medium text-gray-700">Data de Retirada Início</label>
+                    <input type="date" id="filter-data-inicio" name="dataInicio" class="input-field">
+                </div>
+                <div>
+                    <label for="filter-data-fim" class="block text-sm font-medium text-gray-700">Data de Retirada Fim</label>
+                    <input type="date" id="filter-data-fim" name="dataFim" class="input-field">
+                </div>
+            </div>
+            <div>
+                <label for="filter-tipo-produto" class="block text-sm font-medium text-gray-700">Tipo de Produto (Opcional)</label>
+                <select id="filter-tipo-produto" name="tipoProduto" class="input-field">
+                    <option value="">Todos</option>
+                    <option value="Bem-casados">Bem-casados</option>
+                    <option value="Doces finos">Doces finos</option>
+                    <option value="Contrato">Contrato</option> <!-- Adicionado tipo Contrato -->
+                </select>
+            </div>
+            <button type="submit" id="apply-export-filters-btn" class="btn-secondary w-full">Aplicar Filtros</button>
+        </form>
+
+        <div class="overflow-x-auto rounded-lg shadow-md mb-8">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <input type="checkbox" id="select-all-pedidos" class="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out">
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Retirada</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="pedidos-export-table-body" class="bg-white divide-y divide-gray-200">
+                    <!-- Pedidos serão carregados aqui por JavaScript -->
+                </tbody>
+            </table>
+            <div id="no-pedidos-export-message" class="text-center text-gray-500 mt-4 hidden">Nenhum pedido encontrado para os filtros.</div>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="button" id="generate-selected-planilha-btn" class="btn-primary">Gerar Planilha dos Selecionados</button>
+        </div>
+        <div id="export-message" class="text-center mt-4 hidden"></div>
+    </div>
+{% endblock %}

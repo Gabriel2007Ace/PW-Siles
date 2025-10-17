@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Contratos - Divino Doces Finos ERP{% endblock %}
+
+{% block content %}
+    <div id="upload-contratos">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Upload e Análise de Contratos</h2>
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6">
+            <p class="text-gray-600 mb-4">Arraste e solte seu arquivo aqui ou clique para selecionar</p>
+            <input type="file" id="contrato-upload" accept=".pdf" class="hidden">
+            <button type="button" id="select-file-btn" class="btn-secondary">Selecionar Arquivo</button>
+            <p id="file-name" class="mt-2 text-sm text-gray-500"></p>
+        </div>
+        <button type="button" id="analisar-contrato-btn" class="btn-primary w-full mb-6">Analisar Contrato</button>
+        <div id="extraido-preview" class="bg-gray-50 p-6 rounded-lg shadow-inner hidden">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Dados Extraídos (Prévia)</h3>
+            <form id="save-pedido-from-contract-form">
+                <div id="extracted-data-display" class="space-y-2 text-gray-700">
+                    </div>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="submit" id="save-as-pedido-btn" class="btn-primary">Salvar como Pedido</button>
+                </div>
+            </form>
+        </div>
+        <div id="upload-error" class="text-red-600 text-center mt-4 hidden"></div>
+        <div id="upload-success" class="text-green-600 text-center mt-4 hidden">Arquivo enviado e analisado com sucesso!</div>
+    </div>
+{% endblock %}

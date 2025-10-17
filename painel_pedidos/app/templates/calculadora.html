@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}Calculadora de Custos - DoceSystem{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="breadcrumbs">
+        <a href="/pedidos">Início</a>
+        <span>/</span>
+        <span>Calculadora</span>
+    </div>
+    <h1 class="page-title">Calculadora de Custos</h1>
+    <p class="page-subtitle">Calcule custos de produção e margem de lucro</p>
+</div>
+
+<div class="calc-grid">
+    <div class="card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 class="card-title">Seleção de Receita</h3>
+            <button class="btn btn-primary btn-sm" onclick="openModal('novaReceitaModal')">
+                <i class="fas fa-plus"></i>
+                Nova Receita
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="form-label">Escolha uma receita</label>
+                <select class="form-select" id="receitaSelect" onchange="carregarReceita()">
+                    <option value="">Selecione...</option>
+                    <option value="brigadeiro">Brigadeiro Gourmet</option>
+                    <option value="beijinho">Beijinho Tradicional</option>
+                    <option value="cajuzinho">Cajuzinho Premium</option>
+                </select>
+            </div>
+
+            <div id="insumosSection" style="display: none; margin-top: 1.5rem;">
+                <h4 style="margin-bottom: 1rem;">Insumos da Receita</h4>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Ingrediente</th>
+                                <th>Quantidade</th>
+                                <th>Custo (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="insumosTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Resumo e Cálculos</h3>
+        </div>
+        <div class="card-body">
+            <div class="calculo-item">
+                <label>Rendimento da Receita</label>
+                <input type="number" class="form-input" id="rendimento" placeholder="Ex: 50 unidades" onchange="calcularCustos()">
+            </div>
+
+            <div class="calculo-item">
+                <label>Custo Total de Produção</label>
+                <div class="calculo-valor" id="custoTotal">R$ 0,00</div>
+            </div>
+
+            <div class="calculo-item">
+                <label>Custo por Unidade</label>
+                <div class="calculo-valor" id="custoPorUnidade">R$ 0,00</div>
+            </div>
+
+            <div class="calculo-item">
+                <label>Preço de Venda Sugerido</label>
+                <input type="number" class="form-input" id="precoVenda" placeholder="R$ 0,00" step="0.01" onchange="calcularMargem()">
+            </div>
+
+            <div class="calculo-item">
+                <label>Margem de Lucro</label>
+                <div class="margem-container">
+                    <div class="margem-bar">
+                        <div class="margem-fill" id="margemFill" style="width: 0%;"></div>
+                    </div>
+                    <div class="margem-valor" id="margemValor">0%</div>
+                </div>
+            </div>
+
+            <div class="calculo-item">
+                <label>Lucro por Unidade</label>
+                <div class="calculo-valor lucro" id="lucroPorUnidade">R$ 0,00</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="novaReceitaModal">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Cadastrar Nova Receita</h3>
+            <button class="modal-close" onclick="closeModal('novaReceitaModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Nome da Receita</label>
+                <input type="text" class="form-input" placeholder="Ex: Brigadeiro Gourmet">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Rendimento (unidades)</label>
+                <input type="number" class="form-input" placeholder="Ex: 50">
+            </div>
+
+            <h4 style="margin: 1.5rem 0 1rem;">Ingredientes</h4>
+            <div id="ingredientesContainer">
+                <div class="ingrediente-row">
+                    <input type="text" class="form-input" placeholder="Ingrediente" style="flex: 2;">
+                    <input type="text" class="form-input" placeholder="Quantidade" style="flex: 1;">
+                    <input type="number" class="form-input" placeholder="Custo (R$)" step="0.01" style="flex: 1;">
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="adicionarIngrediente()">
+                <i class="fas fa-plus"></i>
+                Adicionar Ingrediente
+            </button>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary modal-cancel" onclick="closeModal('novaReceitaModal')">Cancelar</button>
+            <button class="btn btn-primary" onclick="salvarReceita()">Salvar Receita</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.calculo-item {
+    margin-bottom: 1.5rem;
+}
+
+.calculo-item label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.calculo-valor {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.calculo-valor.lucro {
+    color: var(--success-color);
+}
+
+.margem-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.margem-bar {
+    flex: 1;
+    height: 30px;
+    background: #e2e8f0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.margem-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+    transition: width 0.3s;
+}
+
+.margem-valor {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 60px;
+}
+
+.ingrediente-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+    .calc-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+const receitas = {
+    brigadeiro: {
+        nome: 'Brigadeiro Gourmet',
+        rendimento: 50,
+        insumos: [
+            { ingrediente: 'Leite Condensado', quantidade: '395g', custo: 4.50 },
+            { ingrediente: 'Chocolate em Pó', quantidade: '50g', custo: 2.00 },
+            { ingrediente: 'Manteiga', quantidade: '20g', custo: 0.80 },
+            { ingrediente: 'Granulado', quantidade: '100g', custo: 3.00 }
+        ]
+    },
+    beijinho: {
+        nome: 'Beijinho Tradicional',
+        rendimento: 50,
+        insumos: [
+            { ingrediente: 'Leite Condensado', quantidade: '395g', custo: 4.50 },
+            { ingrediente: 'Coco Ralado', quantidade: '100g', custo: 2.50 },
+            { ingrediente: 'Manteiga', quantidade: '20g', custo: 0.80 }
+        ]
+    },
+    cajuzinho: {
+        nome: 'Cajuzinho Premium',
+        rendimento: 50,
+        insumos: [
+            { ingrediente: 'Leite Condensado', quantidade: '395g', custo: 4.50 },
+            { ingrediente: 'Amendoim', quantidade: '200g', custo: 5.00 },
+            { ingrediente: 'Açúcar', quantidade: '100g', custo: 1.00 }
+        ]
+    }
+};
+
+function carregarReceita() {
+    const select = document.getElementById('receitaSelect');
+    const receitaKey = select.value;
+    
+    if (!receitaKey) {
+        document.getElementById('insumosSection').style.display = 'none';
+        return;
+    }
+    
+    const receita = receitas[receitaKey];
+    const tbody = document.getElementById('insumosTableBody');
+    tbody.innerHTML = '';
+    
+    let custoTotal = 0;
+    receita.insumos.forEach(insumo => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${insumo.ingrediente}</td>
+            <td>${insumo.quantidade}</td>
+            <td>R$ ${insumo.custo.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+        custoTotal += insumo.custo;
+    });
+    
+    document.getElementById('insumosSection').style.display = 'block';
+    document.getElementById('rendimento').value = receita.rendimento;
+    document.getElementById('custoTotal').textContent = 'R$ ' + custoTotal.toFixed(2);
+    calcularCustos();
+}
+
+function calcularCustos() {
+    const custoTotalText = document.getElementById('custoTotal').textContent;
+    const custoTotal = parseFloat(custoTotalText.replace('R$ ', '').replace(',', '.')) || 0;
+    const rendimento = parseFloat(document.getElementById('rendimento').value) || 1;
+    
+    const custoPorUnidade = custoTotal / rendimento;
+    document.getElementById('custoPorUnidade').textContent = 'R$ ' + custoPorUnidade.toFixed(2);
+    
+    calcularMargem();
+}
+
+function calcularMargem() {
+    const custoPorUnidadeText = document.getElementById('custoPorUnidade').textContent;
+    const custoPorUnidade = parseFloat(custoPorUnidadeText.replace('R$ ', '').replace(',', '.')) || 0;
+    const precoVenda = parseFloat(document.getElementById('precoVenda').value) || 0;
+    
+    if (precoVenda === 0) {
+        document.getElementById('margemValor').textContent = '0%';
+        document.getElementById('margemFill').style.width = '0%';
+        document.getElementById('lucroPorUnidade').textContent = 'R$ 0,00';
+        return;
+    }
+    
+    const lucro = precoVenda - custoPorUnidade;
+    const margem = (lucro / precoVenda) * 100;
+    
+    document.getElementById('margemValor').textContent = margem.toFixed(1) + '%';
+    document.getElementById('margemFill').style.width = Math.min(margem, 100) + '%';
+    document.getElementById('lucroPorUnidade').textContent = 'R$ ' + lucro.toFixed(2);
+}
+
+function adicionarIngrediente() {
+    const container = document.getElementById('ingredientesContainer');
+    const row = document.createElement('div');
+    row.className = 'ingrediente-row';
+    row.innerHTML = `
+        <input type="text" class="form-input" placeholder="Ingrediente" style="flex: 2;">
+        <input type="text" class="form-input" placeholder="Quantidade" style="flex: 1;">
+        <input type="number" class="form-input" placeholder="Custo (R$)" step="0.01" style="flex: 1;">
+        <button type="button" class="btn-icon btn-danger" onclick="this.parentElement.remove()">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    container.appendChild(row);
+}
+
+function salvarReceita() {
+    alert('Receita cadastrada com sucesso!');
+    closeModal('novaReceitaModal');
+}
+</script>
+{% endblock %}

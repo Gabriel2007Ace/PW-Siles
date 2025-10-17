@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Novo Pedido - Divino Doces Finos ERP{% endblock %}
+
+{% block content %}
+    <div id="cadastro-pedido">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Registrar Novo Pedido</h2>
+        
+        <form id="pedido-form" class="space-y-6">
+            <!-- INFORMAÇÕES BÁSICAS DO CLIENTE -->
+            <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Informações Básicas do Cliente</h3>
+                <div>
+                    <label for="cliente-nome" class="block text-sm font-medium text-gray-700">Nome do Cliente</label>
+                    <input type="text" id="cliente-nome" name="clienteNome" required class="input-field" placeholder="Nome completo do cliente">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div>
+                        <label for="cliente-telefone" class="block text-sm font-medium text-gray-700">Telefone do Cliente</label>
+                        <input type="text" id="cliente-telefone" name="clienteTelefone" class="input-field" placeholder="(XX) XXXXX-XXXX">
+                    </div>
+                    <div>
+                        <label for="cliente-email" class="block text-sm font-medium text-gray-700">E-mail do Cliente (Opcional)</label>
+                        <input type="email" id="cliente-email" name="clienteEmail" class="input-field" placeholder="email@exemplo.com">
+                    </div>
+                </div>
+                <div>
+                    <label for="observacoes-gerais-cliente" class="block text-sm font-medium text-gray-700">Observações Gerais do Cliente</label>
+                    <textarea id="observacoes-gerais-cliente" name="observacoesGeraisCliente" rows="2" class="input-field" placeholder="Informações adicionais sobre o cliente"></textarea>
+                </div>
+                                    <!-- Coisa NOVA abaixo -->
+
+                    <div>
+                        <label for="prioridade" class="block text-sm font-medium text-gray-700">Prioridade</label>
+                        <select id="prioridade" name="prioridade" class="input-field">
+                            <option value="normal" selected>Normal</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+                    </div> 
+                    <!-- Coisa NOVA acima -->
+            </div>
+
+            <!-- DETALHES BÁSICOS DO PEDIDO -->
+            <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Detalhes Básicos do Pedido</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="data-evento" class="block text-sm font-medium text-gray-700">Data do Evento</label>
+                        <input type="date" id="data-evento" name="dataEvento" required class="input-field">
+                    </div>
+                    <div>
+                        <label for="data-retirada" class="block text-sm font-medium text-gray-700">Data de Retirada</label>
+                        <input type="date" id="data-retirada" name="dataRetirada" required class="input-field">
+                    </div>
+                    <div>
+                        <label for="horario-retirada" class="block text-sm font-medium text-gray-700">Horário de Retirada</label>
+                        <input type="time" id="horario-retirada" name="horarioRetirada" required class="input-field">
+                    </div>
+                    <div>
+                        <label for="tipo-pedido" class="block text-sm font-medium text-gray-700">Tipo de Pedido</label>
+                        <select id="tipo-pedido" name="tipoPedido" required class="input-field">
+                            <option value="">Selecione...</option>
+                            <option value="Bem-casados">Bem-casados</option>
+                            <option value="Doces finos">Doces finos</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label for="quantidade" class="block text-sm font-medium text-gray-700">Quantidade</label>
+                    <input type="number" id="quantidade" name="quantidade" min="1" required class="input-field" placeholder="Ex: 100">
+                </div>
+                <div>
+                    <label for="sabores" class="block text-sm font-medium text-gray-700">Sabores</label>
+                    <textarea id="sabores" name="sabores" rows="3" class="input-field" placeholder="Ex: Chocolate, Limão, Coco"></textarea>
+                </div>
+                <div>
+                    <label for="tipo-embalagem" class="block text-sm font-medium text-gray-700">Tipo de Embalagem</label>
+                    <select id="tipo-embalagem" name="tipoEmbalagem" class="input-field">
+                        <option value="">Selecione...</option>
+                        <option value="Simples">Simples</option>
+                        <option value="Especial">Especial</option>
+                        <option value="Personalizada">Personalizada</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="observacoes" class="block text-sm font-medium text-gray-700">Observações (Específicas do Pedido)</label>
+                    <textarea id="observacoes" name="observacoes" rows="3" class="input-field" placeholder="Informações adicionais sobre o pedido"></textarea>
+                </div>
+            </div>
+
+            <!-- NOVA SEÇÃO: INFORMAÇÕES DO CONTRATO (OPCIONAL E DOBRÁVEL) -->
+            <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 cursor-pointer flex justify-between items-center" id="toggle-contract-info">
+                    Informações do Contrato (Opcional)
+                    <span id="toggle-icon" class="text-gray-600">▼</span>
+                </h3>
+                <div id="contract-info-fields" class="space-y-6 hidden">
+                    <!-- INFORMAÇÕES DO CONTRATANTE -->
+                    <h4 class="text-lg font-semibold text-gray-700 mt-4">Detalhes do Contratante</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="cliente-rg" class="block text-sm font-medium text-gray-700">RG do Contratante</label>
+                            <input type="text" id="cliente-rg" name="clienteRG" class="input-field" placeholder="RG do cliente">
+                        </div>
+                        <div>
+                            <label for="cliente-cpf" class="block text-sm font-medium text-gray-700">CPF do Contratante</label>
+                            <input type="text" id="cliente-cpf" name="clienteCPF" class="input-field" placeholder="CPF do cliente">
+                        </div>
+                    </div>
+
+                    <!-- INFORMAÇÕES DO CONTRATADO -->
+                    <h4 class="text-lg font-semibold text-gray-700 mt-4">Detalhes do Contratado (Divino Doces Finos)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="nome-contratado" class="block text-sm font-medium text-gray-700">Nome da Empresa</label>
+                            <input type="text" id="nome-contratado" name="nomeContratado" class="input-field" placeholder="Nome da empresa contratada">
+                        </div>
+                        <div>
+                            <label for="cnpj-contratado" class="block text-sm font-medium text-gray-700">CNPJ do Contratado</label>
+                            <input type="text" id="cnpj-contratado" name="cnpjContratado" class="input-field" placeholder="CNPJ da empresa contratada">
+                        </div>
+                    </div>
+
+                    <!-- DETALHES FINANCEIROS E DO EVENTO DO CONTRATO -->
+                    <h4 class="text-lg font-semibold text-gray-700 mt-4">Detalhes Financeiros e do Evento</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="valor-total-contrato" class="block text-sm font-medium text-gray-700">Valor Total do Contrato</label>
+                            <input type="text" id="valor-total-contrato" name="valorTotalPedidoContrato" class="input-field" placeholder="R$ 00,00">
+                        </div>
+                        <div>
+                            <label for="data-pagamento-contrato" class="block text-sm font-medium text-gray-700">Data de Pagamento do Contrato</label>
+                            <input type="date" id="data-pagamento-contrato" name="dataPagamentoContrato" class="input-field">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="local-evento" class="block text-sm font-medium text-gray-700">Local do Evento</label>
+                            <input type="text" id="local-evento" name="localEvento" class="input-field" placeholder="Endereço ou nome do local do evento">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÕES DE AÇÃO DO FORMULÁRIO -->
+            <div class="flex justify-end space-x-4">
+                <button type="button" class="btn-secondary">Cancelar</button>
+                <button type="submit" class="btn-primary">Salvar Pedido</button>
+            </div>
+            <div id="pedido-error" class="text-red-600 text-center mt-4 hidden"></div>
+            <div id="pedido-success" class="text-green-600 text-center mt-4 hidden">Pedido salvo com sucesso!</div>
+        </form>
+    </div>
+{% endblock %}

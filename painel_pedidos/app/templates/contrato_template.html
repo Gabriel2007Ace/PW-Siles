@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Contrato</title>
+    <style>
+        /* Estilos CSS para um visual profissional de contrato em PDF */
+        @page {
+            margin: 2.5cm; /* Margens padrão A4 */
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            text-align: justify;
+        }
+        h1, h2 {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 16pt;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 12pt;
+            text-transform: uppercase;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            text-align: left; /* Alinha os títulos das cláusulas à esquerda */
+        }
+        p {
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: left;
+            font-size: 11pt;
+        }
+        th {
+            background-color: #eee;
+        }
+        .assinatura {
+            margin-top: 50px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Divinos Doces Finos</h1>
+    <h2>CONTRATO</h2>
+
+    <p>
+        <strong>CONTRATANTE:</strong>
+        Sr(a) {{ dados.Contratante.Nome }}, brasileiro(a), portador(a) da cédula de RG: {{ dados.Contratante.RG }}
+        e CPF: {{ dados.Contratante.CPF }}, residente e domiciliado(a) na {{ dados.Contratante.Endereco }}
+        - Tel. {{ dados.Contratante.Telefone }}. E-mail: {{ dados.Contratante.Email }}.
+    </p>
+
+    <p>
+        <strong>CONTRATADO:</strong>
+        Divinos Doces Finos, inscrito sob o CNPJ: 18.826.801/0001-76, com sede na Rua Curupacê, 392 Mooca, São Paulo SP representado pela sócia proprietária Damaris Talita Macedo, portador do RG: 30.315.655-7.
+    </p>
+
+    <h2>CLÁUSULA 1 - PRODUTOS CONTRATADOS</h2>
+    {% if dados['Produtos Contratados'] %}
+    <table>
+        <thead>
+            <tr>
+                <th>Quantidade</th>
+                <th>Produto</th>
+                <th>Valor Unitário</th>
+                <th>Valor Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in dados['Produtos Contratados'] %}
+            <tr>
+                <td>{{ item.Quantidade }}</td>
+                <td>{{ item.Produto }}</td>
+                <td>R$ {{ item['Valor Unitário'] }}</td>
+                <td>R$ {{ item['Valor Total Item'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p><strong>TOTAL: R$ {{ dados['Valor Total do Pedido'] }}</strong></p>
+    {% else %}
+    <p>Nenhum produto adicionado.</p>
+    {% endif %}
+
+    <h2>CLÁUSULA 2 - VALOR E FORMA DE PAGAMENTO</h2>
+    <p>
+        O valor total de R$ {{ dados['Valor Total do Pedido'] }} referente aos produtos acima citados, foram pagos no dia
+        {% set data_pag = dados['Data de Pagamento'].split('-') %}{{ data_pag[2] }}/{{ data_pag[1] }}/{{ data_pag[0] }}
+        {{ dados['Forma de Pagamento'] }}.
+    </p>
+    
+    <h2>CLÁUSULA 3 - EMBALAGEM DOS DOCES - FORMINHAS</h2>
+    <p>Os doces finos são entregues em forminhas no formato caixeta, na cor branca, todos decorados e prontos para o consumo. Os brigadeiros serão entregues em forminhas na cor branca nº 5.</p>
+    <p>Caso o CONTRATANTE opte por embalagens decorativas, o mesmo deverá enviar ao CONTRATADO com no máximo 15 dias de antecedência ao evento, que entregará os doces finos dentro das embalagens decoradas, prontos para o consumo. Após esse prazo não recebemos.</p>
+    <p>Por haver um manejo especial nas forminhas no modelo de flor e um custo maior de compra de caixas para armazenamento dos doces, é cobrado uma taxa adicional de R$0,10 por unidade, como consta abaixo:<br>
+    ATÉ 100 DOCES + R$10,00 / ATÉ 200 DOCES + R$20,00 ATÉ 300 DOCES + R$30,00 / ATÉ 400 DOCES + R$40,00 ACIMA DE 500 DOCES + R$50,00 e assim sucessivamente</p>
+
+    <h2>CLÁUSULA 4 - EMBALAGENS DOS BEM-CASADOS</h2>
+    <p>Os bem-casados são entregues em papel crepom crepe plus, com celofane e fita de cetim de 7mm, nas cores enviadas na tabela completa. Os papéis perolados da linha especial serão cobrados R$ 0,40 a mais por unidade e os papéis dourado, prata, tiffany e marsala serão cobrados R$ 0,20 a mais por unidade, por se tratar de um papel especial e com maior custo. Tudo está discriminado na tabela de cores.</p>
+    <p>Caso o CONTRATANTE opte por incluir, medalhinhas, tercinhos, renda, juta, tag ou outro item decorativo, deverá consultar antecipadamente a disponibilidade e todos os itens são colados com cola quente. A entrega dos itens deverá ocorrer com no máximo 15 dias antes do evento. Após esse prazo não recebemos. Por haver um manejo especial dos itens, será cobrado uma taxa adicional de R$0,10, como consta abaixo: ATÉ 100 BEM-CASADOS + R$10,00 / ATÉ 200 BEM-CASADOS + R$20,00 ATÉ 300 BEM-CASADOS + R$30,00 / ATÉ 400 BEM-CASADOS + R$40,00 ACIMA DE 500 BEM-CASADOS + R$50,00 e assim sucessivamente</p>
+    <p>Caso opte pela aplicação de dois ou mais itens, será cobrado o valor de cada item.</p>
+
+    <h2>CLÁUSULA 5 - ALTERAÇÕES</h2>
+    <p>Não recebemos forminhas, modificações, alterações em contrato em hipótese alguma na semana do evento.</p>
+
+    <h2>CLÁUSULA 6 - ADIÇÃO DE NOVOS ITENS</h2>
+    <p>Caso haja a necessidade do CONTRATANTE adicionar novos itens ao pedido fechado, o valor dos produtos será de acordo com o valor vigente no momento da adição, mesmo que o contrato tenha sido fechado com valores promocionais.</p>
+    <p>A adição de produtos ocorre de acordo com a disponibilidade de agenda. Não havendo disponibilidade para novos produtos ou pedidos, não será possível a complementação.</p>
+
+    <h2>CLÁUSULA 7 - RETIRADA OU SERVIÇO DE ENTREGA</h2>
+    <p>A entrega ou retirada dos itens acima, deverá ser definida pela CONTRATANTE até 15 dias antes do evento. Em caso de entrega será cobrada taxa de deslocamento de R$ 6,00 por km ou a taxa mínima de R$50,00 (sujeito a disponibilidade na data e horário desejados). Não fazemos entregas aos domingos e feriados. A retirada dos produtos ocorre de segunda-feira à sábado, das 9h às 16h30, mediante agendamento com o setor responsável, não havendo expediente aos domingos e feriados.</p>
+    
+    <h2>CLÁUSULA 8 - ARMAZENAMENTO</h2>
+    <p>Todos os doces e/ou bem-casados deverão, obrigatoriamente, ser armazenados em geladeira até o momento da montagem da mesa para o evento. Validade 3 a 5 dias em geladeira.</p>
+
+    <h2>CLÁUSULA 9 - LOCAÇÃO (SE HOUVER)</h2>
+    <p>Caso haja locação de bolo cenográfico, o CONTRATANTE deverá deixar uma caução no valor de R$300,00 ou o valor em dinheiro, como forma de garantia. O bolo cenográfico sendo locado e deverá retornar nas mesmas condições, em até 4 dias após a data da retirada. Na devolução do bolo cenográfico, será devolvido o valor total. Em caso de avarias será cobrado R$ 100,00 por andar (dependendo do modelo) para refazer cada andar danificado. O CONTRATANTE deverá tomar todos os cuidados necessários como: não expor ao calor excessivo, água ou qualquer outro líquido, não deverá apertar, amassar, não deixar convidados colocarem as mãos e deverá ser transportado com cuidado, pegando somente pela base de madeira.</p>
+
+    <h2>CLÁUSULA 10 - REMARCAÇÃO</h2>
+    <p>Em caso de REMARCAÇÃO de data do evento superior a 6 meses, será cobrado um reequilíbrio econômico e financeiro de 10% sobre o valor do contrato, a cada 6 meses de diferença da data marcada inicialmente.</p>
+    
+    <h2>CLÁUSULA 11 - DATA E LOCAL DO EVENTO</h2>
+    <p>
+        O evento acontecerá no dia: {% set data_evt = dados['Data do Evento'].split('-') %}{{ data_evt[2] }}/{{ data_evt[1] }}/{{ data_evt[0] }}
+        - Local do evento: {{ dados['Local do Evento'] }}
+    </p>
+    <p>Como nos conheceu: {{ dados['Como nos conheceu'] }}</p>
+
+    <h2>CLÁUSULA 12 - CANCELAMENTO</h2>
+    <p>A CONTRATANTE pagará multa de 30% do valor do contrato em caso de cancelamento. O CONTRATADO pagará multa de 100% do valor do contrato em caso de cancelamento.</p>
+
+    <div class="assinatura">
+        <p>RESPONSÁVEL PELO CONTRATO: {{ dados.Responsavel }}</p>
+        <p>São Paulo, {% set data_pag_final = dados['Data de Pagamento'].split('-') %}{{ data_pag_final[2] }}/{{ data_pag_final[1] }}/{{ data_pag_final[0] }}</p>
+        <br><br>
+        <p>______________________________<br>CONTRATANTE</p>
+        <br><br>
+        <p>______________________________<br>CONTRATADO</p>
+    </div>
+</body>
+</html>

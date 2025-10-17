@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Exportação - DoceSystem{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="breadcrumbs">
+        <a href="/pedidos">Início</a>
+        <span>/</span>
+        <span>Exportação</span>
+    </div>
+    <h1 class="page-title">Exportação de Pedidos</h1>
+    <p class="page-subtitle">Selecione e exporte pedidos para planilha</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Filtros de Data</h3>
+    </div>
+    <div class="card-body">
+        <div class="filters-grid">
+            <div class="form-group">
+                <label class="form-label">Data de Retirada - Início</label>
+                <input type="date" class="form-input" id="dataInicio">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Data de Retirada - Fim</label>
+                <input type="date" class="form-input" id="dataFim">
+            </div>
+            <div class="form-group">
+                <label class="form-label">&nbsp;</label>
+                <button class="btn btn-primary" onclick="filtrarPedidos()">
+                    <i class="fas fa-filter"></i>
+                    Filtrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 1.5rem;">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h3 class="card-title">Pedidos para Exportação</h3>
+            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                <span id="pedidosSelecionados">0</span> pedidos selecionados
+            </p>
+        </div>
+        <button class="btn btn-success" onclick="gerarPlanilha()">
+            <i class="fas fa-file-excel"></i>
+            Gerar Planilha
+        </button>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">
+                            <input type="checkbox" id="selectAll" onchange="selecionarTodos()">
+                        </th>
+                        <th>Cliente</th>
+                        <th>Data de Retirada</th>
+                        <th>Quantidade</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="pedidosTableBody">
+                    {% for pedido in pedidos %}
+                    <tr class="pedido-exportacao" data-data="{{ pedido.data_retirada }}">
+                        <td>
+                            <input type="checkbox" class="pedido-checkbox" onchange="atualizarContador()">
+                        </td>
+                        <td>{{ pedido.cliente }}</td>
+                        <td>{{ pedido.data_retirada }}</td>
+                        <td>{{ pedido.quantidade }}</td>
+                        <td>
+                            {% if pedido.status == 'Confirmado' %}
+                                <span class="badge badge-success">{{ pedido.status }}</span>
+                            {% elif pedido.status == 'Produção' %}
+                                <span class="badge badge-warning">{{ pedido.status }}</span>
+                            {% else %}
+                                <span class="badge badge-danger">{{ pedido.status }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+</style>
+
+<script>
+function selecionarTodos() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.pedido-checkbox');
+    checkboxes.forEach(cb => {
+        if (cb.closest('tr').style.display !== 'none') {
+            cb.checked = selectAll.checked;
+        }
+    });
+    atualizarContador();
+}
+
+function atualizarContador() {
+    const checkboxes = document.querySelectorAll('.pedido-checkbox:checked');
+    let count = 0;
+    checkboxes.forEach(cb => {
+        if (cb.closest('tr').style.display !== 'none') {
+            count++;
+        }
+    });
+    document.getElementById('pedidosSelecionados').textContent = count;
+}
+
+function filtrarPedidos() {
+    const dataInicio = document.getElementById('dataInicio').value;
+    const dataFim = document.getElementById('dataFim').value;
+    
+    document.querySelectorAll('.pedido-exportacao').forEach(row => {
+        const dataRetirada = row.dataset.data;
+        let mostrar = true;
+        
+        if (dataInicio && dataRetirada < dataInicio) {
+            mostrar = false;
+        }
+        
+        if (dataFim && dataRetirada > dataFim) {
+            mostrar = false;
+        }
+        
+        row.style.display = mostrar ? '' : 'none';
+    });
+    
+    atualizarContador();
+}
+
+function gerarPlanilha() {
+    const checkboxes = document.querySelectorAll('.pedido-checkbox:checked');
+    let count = 0;
+    checkboxes.forEach(cb => {
+        if (cb.closest('tr').style.display !== 'none') {
+            count++;
+        }
+    });
+    
+    if (count === 0) {
+        alert('Selecione pelo menos um pedido para exportar!');
+        return;
+    }
+    
+    alert(`Planilha com ${count} pedidos será gerada e baixada!`);
+}
+</script>
+{% endblock %}

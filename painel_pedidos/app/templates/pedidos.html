@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Painel de Pedidos - DoceSystem{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="breadcrumbs">
+    <a href="/pedidos">Início</a>
+    <span>/</span>
+    <span>Pedidos</span>
+  </div>
+  <h1 class="page-title">Painel Geral de Pedidos</h1>
+  <p class="page-subtitle">Gerencie todos os pedidos e contratos</p>
+</div>
+
+<!-- ======== CARTÃO DE FILTROS ======== -->
+<div class="card filtros-card">
+  <div class="card-body">
+    <h2 class="card-title">Filtros</h2>
+
+    <form id="filtrosPedidos" class="filters-form">
+      <div class="filters-grid">
+        <div class="form-group">
+          <label for="clienteFiltro">Cliente</label>
+          <input type="text" id="clienteFiltro" name="cliente" class="form-control" placeholder="Nome do cliente">
+        </div>
+
+        <div class="form-group">
+          <label for="dataEventoFiltro">Data do Evento</label>
+          <input type="date" id="filtroData" name="dataEvento" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="statusFiltro">Status</label>
+          <select id="filtroStatus" name="status" class="form-select">
+            <option value="">Todos</option>
+            <option value="pendente">Pendente</option>
+            <option value="producao">Produção</option>
+            <option value="confirmado">Confirmado</option>
+          </select>
+        </div>
+
+        <div class="form-group filtro-botao">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-filter"></i> Aplicar Filtros
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======== CARTÃO DE LISTA DE PEDIDOS ======== -->
+<div class="card lista-pedidos-card">
+  <div class="card-body">
+    <div class="card-header-flex">
+      <h2 class="card-title">Lista de Pedidos</h2>
+      <a href="/pedidos/novo" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Novo Pedido
+      </a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Data do Evento</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>Responsável</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="pedidosTableBody">
+          <!-- Linhas preenchidas via JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div id="mensagemErro" class="text-danger mt-3" style="display:none;">
+      Ocorreu um erro ao carregar os pedidos.
+    </div>
+  </div>
+</div>
+
+<!-- Importa o JS funcional existente -->
+<script src="{{ url_for('static', filename='js/pedidos.js') }}"></script>
+
+<!-- ======== ESTILO LOCAL ======== -->
+<style>
+/* 🎨 VARIÁVEIS DE TEMA */
+:root {
+  --primary-color: #6366f1;
+  --primary-hover: #4f46e5;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --text-main: #1e293b;
+  --text-secondary: #64748b;
+  --card-bg: #fff;
+}
+
+/* ===== CABEÇALHO ===== */
+.page-header {
+  margin-bottom: 1.5rem;
+}
+.breadcrumbs {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+.breadcrumbs a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+.breadcrumbs span {
+  margin: 0 4px;
+}
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.page-subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+/* ===== CARTÕES ===== */
+.card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  margin-bottom: 1.5rem;
+}
+.card-body {
+  padding: 1.5rem;
+}
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-main);
+}
+
+/* ===== FILTROS ===== */
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+.form-group label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+.form-control, .form-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+}
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.btn-primary {
+  background: var(--primary-color);
+  color: white;
+}
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+/* ===== LISTA DE PEDIDOS ===== */
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.table thead th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+.table td {
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+.pedido-row td:first-child {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* ===== BOTÕES DE AÇÃO ===== */
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+.btn-icon i {
+  pointer-events: none;
+}
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+.btn-icon:hover {
+  opacity: 0.85;
+}
+
+/* ===== NENHUM PEDIDO ===== */
+.empty-message {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 2rem 0;
+}
+.empty-message i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+  .table {
+    font-size: 0.85rem;
+  }
+}
+</style>
+
+{% endblock %}

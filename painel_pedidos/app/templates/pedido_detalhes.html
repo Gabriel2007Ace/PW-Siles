@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes do Pedido #{{ pedido.id }} - DoceSystem{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="breadcrumbs">
+        <a href="/pedidos">Pedidos</a>
+        <span>/</span>
+        <span>Detalhes #{{ pedido.id }}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 class="page-title">Detalhes do Pedido – ID #{{ pedido.id }}</h1>
+            <p class="page-subtitle">{{ pedido.cliente.nome }} – {{ pedido.detalhes.data_evento }}</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <button class="btn btn-secondary" onclick="editarPedido()">
+                <i class="fas fa-edit"></i>
+                Editar
+            </button>
+            <button class="btn btn-success" onclick="gerarComprovante()">
+                <i class="fas fa-file-pdf"></i>
+                Comprovante
+            </button>
+            <button class="btn btn-danger" onclick="cancelarPedido()">
+                <i class="fas fa-times-circle"></i>
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="details-grid">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Status e Timeline</h3>
+        </div>
+        <div class="card-body">
+            <div class="status-badge-container">
+                <span class="badge badge-success" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                    {{ pedido.status }}
+                </span>
+                {% if pedido.dias_restantes > 15 %}
+                    <span class="proximity-badge green">
+                        <i class="fas fa-calendar-check"></i>
+                        Evento em {{ pedido.dias_restantes }} dias
+                    </span>
+                {% elif pedido.dias_restantes >= 7 %}
+                    <span class="proximity-badge yellow">
+                        <i class="fas fa-calendar-alt"></i>
+                        Evento em {{ pedido.dias_restantes }} dias
+                    </span>
+                {% else %}
+                    <span class="proximity-badge red">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Evento em {{ pedido.dias_restantes }} dias
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item completed">
+                    <div class="timeline-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <strong>Criado</strong>
+                    </div>
+                </div>
+                <div class="timeline-item completed">
+                    <div class="timeline-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <strong>Confirmado</strong>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fas fa-industry"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <strong>Produção</strong>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <strong>Pronto</strong>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <strong>Entregue</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="responsavel-info">
+                <p><strong>Criado por:</strong> {{ pedido.responsavel }}</p>
+                <p><strong>Última atualização:</strong> {{ pedido.responsavel }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Informações do Cliente</h3>
+        </div>
+        <div class="card-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Nome Completo</label>
+                    <p>{{ pedido.cliente.nome }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Telefone</label>
+                    <p>{{ pedido.cliente.telefone }}</p>
+                </div>
+                <div class="info-item">
+                    <label>E-mail</label>
+                    <p>{{ pedido.cliente.email }}</p>
+                </div>
+                <div class="info-item">
+                    <label>RG</label>
+                    <p>{{ pedido.cliente.rg }}</p>
+                </div>
+                <div class="info-item">
+                    <label>CPF</label>
+                    <p>{{ pedido.cliente.cpf }}</p>
+                </div>
+                <div class="info-item full-width">
+                    <label>Observações</label>
+                    <p>{{ pedido.cliente.observacoes }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Informações do Contratado</h3>
+        </div>
+        <div class="card-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Nome da Empresa</label>
+                    <p>{{ pedido.contratado.empresa }}</p>
+                </div>
+                <div class="info-item">
+                    <label>CNPJ</label>
+                    <p>{{ pedido.contratado.cnpj }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Detalhes do Pedido</h3>
+        </div>
+        <div class="card-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Tipo de Produto</label>
+                    <p>{{ pedido.detalhes.tipo }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Data do Evento</label>
+                    <p>{{ pedido.detalhes.data_evento }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Data de Retirada</label>
+                    <p>{{ pedido.detalhes.data_retirada }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Horário de Retirada</label>
+                    <p>{{ pedido.detalhes.horario_retirada }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Quantidade Total</label>
+                    <p>{{ pedido.detalhes.quantidade }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Tipo de Embalagem</label>
+                    <p>{{ pedido.detalhes.embalagem }}</p>
+                </div>
+                <div class="info-item full-width">
+                    <label>Sabores</label>
+                    <p>{{ pedido.detalhes.sabores }}</p>
+                </div>
+                <div class="info-item full-width">
+                    <label>Observações Específicas</label>
+                    <p>{{ pedido.detalhes.observacoes }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card full-width">
+        <div class="card-header">
+            <h3 class="card-title">Produtos Contratados</h3>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Quantidade</th>
+                            <th>Produto</th>
+                            <th>Valor Unitário</th>
+                            <th>Valor Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produto in pedido.produtos %}
+                        <tr>
+                            <td>{{ produto.quantidade }}</td>
+                            <td>{{ produto.produto }}</td>
+                            <td>R$ {{ "%.2f"|format(produto.valor_unitario) }}</td>
+                            <td><strong>R$ {{ "%.2f"|format(produto.valor_total) }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                        <tr style="background: #f8fafc;">
+                            <td colspan="3" style="text-align: right;"><strong>Total Geral:</strong></td>
+                            <td><strong style="color: var(--primary-color); font-size: 1.1rem;">R$ {{ "%.2f"|format(pedido.produtos|sum(attribute='valor_total')) }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card full-width">
+        <div class="card-header">
+            <h3 class="card-title">Histórico de Interações</h3>
+        </div>
+        <div class="card-body">
+            <div class="historico-list">
+                {% for item in pedido.historico %}
+                <div class="historico-item">
+                    <div class="historico-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="historico-content">
+                        <p><strong>{{ item.acao }}</strong></p>
+                        <p class="historico-meta">{{ item.data }} • {{ item.funcionario }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card full-width">
+        <div class="card-header">
+            <h3 class="card-title">Upload de Arquivos</h3>
+        </div>
+        <div class="card-body">
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                <p><strong>Arraste arquivos aqui ou clique para selecionar</strong></p>
+                <p style="font-size: 0.875rem; color: var(--text-secondary);">Comprovantes, contratos, fotos de amostras</p>
+                <input type="file" id="fileInput" multiple style="display: none;">
+            </div>
+            <div class="uploaded-files" id="uploadedFiles"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.status-badge-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.proximity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.proximity-badge.green {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.proximity-badge.yellow {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.proximity-badge.red {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.timeline {
+    margin: 1.5rem 0;
+}
+
+.timeline-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 40px;
+    width: 2px;
+    height: calc(100% + 1rem);
+    background: var(--border-color);
+}
+
+.timeline-item.completed::before {
+    background: var(--success-color);
+}
+
+.timeline-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--border-color);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    z-index: 1;
+}
+
+.timeline-item.completed .timeline-icon {
+    background: var(--success-color);
+    color: white;
+}
+
+.responsavel-info {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.responsavel-info p {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+}
+
+.info-item label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.info-item p {
+    font-size: 0.938rem;
+    color: var(--text-primary);
+}
+
+.info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.historico-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.historico-item {
+    display: flex;
+    align-items: flex-start;
+}
+
+.historico-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.historico-content p {
+    margin: 0;
+}
+
+.historico-meta {
+    font-size: 0.813rem;
+    color: var(--text-secondary);
+}
+
+.upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upload-area:hover {
+    border-color: var(--primary-color);
+    background: #f8fafc;
+}
+
+.uploaded-files {
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function editarPedido() {
+    alert('Modo de edição ativado!');
+}
+
+function gerarComprovante() {
+    alert('Comprovante de retirada será gerado em PDF');
+}
+
+function cancelarPedido() {
+    if (confirm('Tem certeza que deseja cancelar este pedido?')) {
+        const motivo = prompt('Digite o motivo do cancelamento:');
+        if (motivo) {
+            alert('Pedido cancelado. Motivo: ' + motivo);
+        }
+    }
+}
+
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const uploadedFiles = document.getElementById('uploadedFiles');
+
+uploadArea.addEventListener('click', () => fileInput.click());
+
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.style.borderColor = 'var(--primary-color)';
+    uploadArea.style.background = '#f8fafc';
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.style.borderColor = 'var(--border-color)';
+    uploadArea.style.background = '';
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.borderColor = 'var(--border-color)';
+    uploadArea.style.background = '';
+    handleFiles(e.dataTransfer.files);
+});
+
+fileInput.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+});
+
+function handleFiles(files) {
+    Array.from(files).forEach(file => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'uploaded-file-item';
+        fileItem.innerHTML = `
+            <i class="fas fa-file"></i>
+            <span>${file.name}</span>
+            <small>${(file.size / 1024).toFixed(2)} KB</small>
+        `;
+        uploadedFiles.appendChild(fileItem);
+    });
+}
+</script>
+{% endblock %}

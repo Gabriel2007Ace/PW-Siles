@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MVP TCC - Sistema de Pedidos{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div id="app" class="bg-white rounded-lg shadow-xl p-8 max-w-4xl w-full mx-auto my-8">
+        <div class="absolute top-4 right-4 flex items-center space-x-2">
+            <div id="backend-status-indicator" class="w-3 h-3 rounded-full bg-gray-400" title="Backend Status (Preview)"></div>
+            <span id="backend-status-text" class="text-sm text-gray-600">Backend Status (Preview)</span>
+        </div>
+
+        
+        <nav id="navbar" class="mb-8 hidden">
+    <ul class="flex justify-around bg-gray-200 p-4 rounded-lg shadow-inner">
+        <li><a href="{{ url_for('main_pages.list_pedidos_page') }}" class="text-gray-700 hover:text-blue-600 font-medium">Pedidos</a></li>
+        <li><a href="{{ url_for('main_pages.new_pedido_page') }}" class="text-gray-700 hover:text-blue-600 font-medium">Novo Pedido</a></li>
+        <li><a href="{{ url_for('main_pages.calculadora_custos_page') }}" class="text-gray-700 hover:text-blue-600 font-medium">Calculadora</a></li>
+        <li><a href="{{ url_for('main_pages.upload_contratos_page') }}" class="text-gray-700 hover:text-blue-600 font-medium">Upload Contrato</a></li>
+        <li><a href="{{ url_for('main_pages.novo_contrato_page') }}" class="text-gray-700 hover:text-blue-600 font-medium">Novo Contrato</a></li>
+        <li><a href="{{ url_for('main_pages.exportar_planilha_page') }}" class="text-gray-700 hover:text-blue-600 font-medium">Exportar</a></li>
+        <li><a href="{{ url_for('main_pages.relatorios_page') }}" class="text-gray-700 hover:text-blue-600 font-medium">Relatórios</a></li>
+        <li> <a href="{{ url_for('main_pages.pagina_equipe')}}" class="text-gray-700 hover:text-blue-600 font-medium"> Equipe</a></li>
+        <li><button id="logout-button" class="text-red-600 hover:text-red-800 font-medium">Sair</button></li>
+    </ul>
+</nav>
+
+        {% block content %}{% endblock %}
+
+        <div id="messageModal" class="modal hidden">
+            <div class="modal-content">
+                <span id="modal-close-button" class="close-button">&times;</span>
+                <p id="modalMessage" class="text-lg font-medium text-gray-800">Mensagem de Preview</p>
+                <button id="modal-ok-button" class="btn-primary mt-4">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CDN do Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/exportacao.js') }}"></script>
+</body>
+</html>

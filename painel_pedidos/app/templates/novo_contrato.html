@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Gerar Contrato - DoceSystem{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Geração de Contrato</h1>
+    <p class="page-subtitle">Preencha os dados para gerar um novo contrato</p>
+</div>
+
+<form class="contrato-form" id="contratoForm">
+    <div class="form-sections">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Dados do Contratante</h3></div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label">Nome Completo *</label><input type="text" name="contratanteNome" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">RG *</label><input type="text" name="contratanteRg" class="form-input" placeholder="00.000.000-0" required></div>
+                    <div class="form-group"><label class="form-label">CPF *</label><input type="text" name="contratanteCpf" class="form-input" placeholder="000.000.000-00" required></div>
+                    <div class="form-group"><label class="form-label">Telefone *</label><input type="tel" name="contratanteTelefone" class="form-input" placeholder="(00) 00000-0000" required></div>
+                    <div class="form-group full-width"><label class="form-label">E-mail</label><input type="email" name="contratanteEmail" class="form-input"></div>
+                    <div class="form-group full-width"><label class="form-label">Endereço Completo</label><textarea name="contratanteEndereco" class="form-textarea" rows="2"></textarea></div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Detalhes do Evento</h3></div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label">Data do Evento *</label><input type="date" name="dataEvento" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Horário</label><input type="time" name="horarioEvento" class="form-input"> </div>
+                    <div class="form-group full-width"><label class="form-label">Local do Evento</label><input type="text" name="localEvento" class="form-input" placeholder="Nome e endereço do local"></div>
+                    <div class="form-group full-width"><label class="form-label">Como nos conheceu?</label>
+                        <select name="comoConheceu" class="form-select">
+                            <option value="">Selecione...</option><option>Instagram</option><option>Facebook</option><option>Indicação</option><option>Google</option><option>Outros</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Produtos Contratados</h3></div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="table produtos-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%;">Produto</th><th>Quantidade</th><th>Valor Unit. (R$)</th><th>Valor Total (R$)</th><th style="width: 60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="produtosTableBody"></tbody>
+                        <tfoot>
+                            <tr style="background: #f8fafc;">
+                                <td colspan="3" style="text-align: right;"><strong>Valor Total do Contrato:</strong></td>
+                                <td colspan="2"><strong id="valorTotalContrato" style="color: var(--primary-color);">R$ 0,00</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="adicionarLinhaProduto()"><i class="fas fa-plus"></i> Adicionar Produto</button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Valores e Pagamento</h3></div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label">Data de Pagamento</label><input type="date" name="dataPagamentoContrato" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">Forma de Pagamento *</label>
+                        <select name="formaPagamento" class="form-select" required>
+                            <option value="">Selecione...</option><option>PIX</option><option>Dinheiro</option><option>Cartão de Crédito</option><option>Cartão de Débito</option><option>Transferência Bancária</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width"><label class="form-label">Responsável pela Criação</label><input type="text" name="responsavelContrato" class="form-input" placeholder="Nome do funcionário"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <input type="hidden" id="formato_desejado" name="formato_desejado" value="docx">
+
+    <div class="form-actions-bottom">
+        <a href="/pedidos" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
+        
+        <button type="submit" class="btn btn-primary" onclick="setDownloadFormat('docx')">
+            <i class="fas fa-file-word"></i> Gerar e Baixar DOCX
+        </button>
+        
+        <button type="submit" class="btn btn-danger" onclick="setDownloadFormat('pdf')">
+            <i class="fas fa-file-pdf"></i> Gerar e Baixar PDF
+        </button>
+    </div>
+</form>
+
+<style>
+/* Seu CSS (inalterado) */
+.form-sections { display: flex; flex-direction: column; gap: 1.5rem; }
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.form-group.full-width { grid-column: 1 / -1; }
+.produtos-table input { margin: 0; }
+.form-actions-bottom { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-color); }
+@media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contratoForm = document.getElementById('contratoForm');
+    const produtosTableBody = document.getElementById('produtosTableBody');
+
+    // MUDANÇA 3: Nova função para definir o formato do arquivo antes do envio.
+    // Ela atualiza o valor do campo oculto que adicionamos ao formulário.
+    window.setDownloadFormat = function(format) {
+        document.getElementById('formato_desejado').value = format;
+    }
+
+    // --- LÓGICA DE UI PARA A TABELA DINÂMICA (Mantida) ---
+    window.adicionarLinhaProduto = function() {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" name="produto_nome" class="form-input" placeholder="Nome do produto" required></td>
+            <td><input type="number" name="produto_qtd" class="form-input qtd-input" min="1" value="1" required></td>
+            <td><input type="number" name="produto_valor_unit" class="form-input valor-input" min="0" step="0.01" placeholder="0.00" required></td>
+            <td><input type="text" name="produto_valor_total" class="form-input total-input" readonly></td>
+            <td><button type="button" class="btn-icon btn-danger" onclick="this.closest('tr').remove(); calcularTotal();"><i class="fas fa-trash"></i></button></td>
+        `;
+        produtosTableBody.appendChild(tr);
+        addCalculationListeners(tr);
+    }
+
+    function calcularTotal() {
+        let total = 0;
+        document.querySelectorAll('#produtosTableBody tr').forEach(tr => {
+            const qtd = parseFloat(tr.querySelector('.qtd-input')?.value) || 0;
+            const valor = parseFloat(tr.querySelector('.valor-input')?.value) || 0;
+            const totalProduto = qtd * valor;
+            tr.querySelector('.total-input').value = totalProduto.toFixed(2);
+            total += totalProduto;
+        });
+        document.getElementById('valorTotalContrato').textContent = 'R$ ' + total.toFixed(2);
+    }
+
+    function addCalculationListeners(element) {
+        element.querySelectorAll('.qtd-input, .valor-input').forEach(input => {
+            input.addEventListener('input', calcularTotal);
+        });
+    }
+
+    adicionarLinhaProduto();
+
+    // --- SUBMISSÃO DO FORMULÁRIO (ATUALIZADA) ---
+    contratoForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            alert('Você precisa estar logado para gerar um contrato.');
+            return;
+        }
+
+        // FormData coleta todos os campos do formulário, incluindo o 'formato_desejado' oculto.
+        const formData = new FormData(contratoForm);
+        const contratoData = Object.fromEntries(formData.entries());
+
+        const produtos = [];
+        document.querySelectorAll('#produtosTableBody tr').forEach(row => {
+            produtos.push({
+                'Produto': row.querySelector('input[name="produto_nome"]').value,
+                'Quantidade': row.querySelector('input[name="produto_qtd"]').value,
+                'Valor Unitário': row.querySelector('input[name="produto_valor_unit"]').value,
+                'Valor Total Item': row.querySelector('input[name="produto_valor_total"]').value
+            });
+        });
+        contratoData.produtosContratados = produtos;
+        contratoData.valorTotalPedidoContrato = document.getElementById('valorTotalContrato').textContent.replace('R$ ', '').trim();
+        
+        try {
+            const response = await fetch('/api/contracts/gerar-contrato', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-User-Id': userId },
+                body: JSON.stringify(contratoData)
+            });
+
+            if (response.ok) {
+                // MUDANÇA 4: Lógica de download aprimorada.
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                // Tenta pegar o nome do arquivo que o backend envia. É mais seguro.
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = `contrato.${contratoData.formato_desejado}`; // Nome padrão
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                    if (filenameMatch && filenameMatch.length > 1) {
+                        filename = filenameMatch[1];
+                    }
+                }
+
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url); // Limpa a memória
+
+                alert('Contrato gerado com sucesso! O download foi iniciado.');
+                contratoForm.reset();
+                produtosTableBody.innerHTML = ''; // Limpa a tabela
+                adicionarLinhaProduto();
+                calcularTotal();
+            } else {
+                const error = await response.json();
+                alert(`Erro ao gerar contrato: ${error.message}`);
+            }
+        } catch (error) {
+            console.error('Erro de conexão ao gerar contrato:', error);
+            alert('Erro de conexão com o servidor. Tente novamente.');
+        }
+    });
+});
+</script>
+{% endblock %}

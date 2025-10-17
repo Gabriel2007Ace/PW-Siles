@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios - DoceSystem{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="breadcrumbs">
+        <a href="/pedidos">Início</a>
+        <span>/</span>
+        <span>Relatórios</span>
+    </div>
+    <h1 class="page-title">Dashboard de Relatórios</h1>
+    <p class="page-subtitle">Análise e insights sobre seus pedidos</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Filtros</h3>
+    </div>
+    <div class="card-body">
+        <div class="filters-grid">
+            <div class="form-group">
+                <label class="form-label">Período</label>
+                <select class="form-select">
+                    <option>Este mês</option>
+                    <option>Este trimestre</option>
+                    <option>Este ano</option>
+                    <option>Personalizado</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tipo de Produto</label>
+                <select class="form-select">
+                    <option value="">Todos</option>
+                    <option>Doces Finos</option>
+                    <option>Bem-casados</option>
+                    <option>Bolos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cliente</label>
+                <input type="text" class="form-input" placeholder="Buscar cliente...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">&nbsp;</label>
+                <button class="btn btn-primary">
+                    <i class="fas fa-filter"></i>
+                    Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #dbeafe;">
+            <i class="fas fa-shopping-bag" style="color: #1e40af;"></i>
+        </div>
+        <div class="stat-content">
+            <p class="stat-label">Total de Pedidos (Mês)</p>
+            <h2 class="stat-value">47</h2>
+            <p class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                12% vs mês anterior
+            </p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fef3c7;">
+            <i class="fas fa-star" style="color: #92400e;"></i>
+        </div>
+        <div class="stat-content">
+            <p class="stat-label">Produtos Mais Pedidos</p>
+            <h2 class="stat-value">Doces Finos</h2>
+            <p class="stat-change">23 pedidos</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #d1fae5;">
+            <i class="fas fa-dollar-sign" style="color: #065f46;"></i>
+        </div>
+        <div class="stat-content">
+            <p class="stat-label">Receita Total (Mês)</p>
+            <h2 class="stat-value">R$ 12.450</h2>
+            <p class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                8% vs mês anterior
+            </p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fee2e2;">
+            <i class="fas fa-clock" style="color: #991b1b;"></i>
+        </div>
+        <div class="stat-content">
+            <p class="stat-label">Pedidos Pendentes</p>
+            <h2 class="stat-value">8</h2>
+            <p class="stat-change">Requer atenção</p>
+        </div>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Evolução de Pedidos</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="pedidosChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Produtos por Categoria</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="categoriasChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Top 5 Clientes</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="clientesChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Comparativo Ano a Ano</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="comparativoChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 1.5rem;">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="card-title">Exportação</h3>
+        <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-success">
+                <i class="fas fa-file-excel"></i>
+                Exportar Excel
+            </button>
+            <button class="btn btn-danger">
+                <i class="fas fa-file-pdf"></i>
+                Exportar PDF
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <p style="color: var(--text-secondary);">Configure o envio automático de relatórios por e-mail</p>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+            <div class="form-group" style="margin: 0; flex: 1; min-width: 200px;">
+                <select class="form-select">
+                    <option>Mensal</option>
+                    <option>Semanal</option>
+                    <option>Diário</option>
+                </select>
+            </div>
+            <button class="btn btn-primary">
+                <i class="fas fa-envelope"></i>
+                Agendar Envio
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.stat-change {
+    font-size: 0.813rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.stat-change.positive {
+    color: var(--success-color);
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+const pedidosCtx = document.getElementById('pedidosChart').getContext('2d');
+new Chart(pedidosCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+        datasets: [{
+            label: 'Pedidos',
+            data: [12, 19, 15, 25, 32, 28],
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: { legend: { display: false } }
+    }
+});
+
+const categoriasCtx = document.getElementById('categoriasChart').getContext('2d');
+new Chart(categoriasCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Doces Finos', 'Bem-casados', 'Bolos', 'Salgados'],
+        datasets: [{
+            data: [40, 25, 20, 15],
+            backgroundColor: ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true
+    }
+});
+
+const clientesCtx = document.getElementById('clientesChart').getContext('2d');
+new Chart(clientesCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Maria S.', 'João P.', 'Ana C.', 'Pedro L.', 'Carla M.'],
+        datasets: [{
+            label: 'Pedidos',
+            data: [8, 6, 5, 4, 3],
+            backgroundColor: '#6366f1'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: { legend: { display: false } }
+    }
+});
+
+const comparativoCtx = document.getElementById('comparativoChart').getContext('2d');
+new Chart(comparativoCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+        datasets: [
+            {
+                label: '2025',
+                data: [12, 19, 15, 25, 32, 28],
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)'
+            },
+            {
+                label: '2024',
+                data: [8, 14, 12, 18, 24, 22],
+                borderColor: '#94a3b8',
+                backgroundColor: 'rgba(148, 163, 184, 0.1)'
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true
+    }
+});
+</script>
+{% endblock %}

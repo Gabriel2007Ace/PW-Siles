@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Novo Pedido - DoceSystem{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Criar Novo Pedido</h1>
+    <p class="page-subtitle">Preencha os dados do pedido manual</p>
+</div>
+
+<form class="pedido-form" id="novoPedidoForm">
+    <div class="form-sections">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Informações do Cliente</h3></div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label">Nome Completo *</label><input type="text" name="clienteNome" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Telefone *</label><input type="tel" name="clienteTelefone" class="form-input" placeholder="(00) 00000-0000" required></div>
+                    <div class="form-group"><label class="form-label">E-mail</label><input type="email" name="clienteEmail" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">CPF</label><input type="text" name="clienteCPF" class="form-input" placeholder="000.000.000-00"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Detalhes do Pedido</h3></div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label">Tipo de Produto *</label>
+                        <select name="tipoPedido" class="form-select" required>
+                            <option value="">Selecione...</option><option>Doces Finos</option><option>Bem-casados</option><option>Bolos</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">Data do Evento *</label><input type="date" name="dataEvento" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Data de Retirada *</label><input type="date" name="dataRetirada" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Horário de Retirada *</label><input type="time" name="horarioRetirada" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Tipo de Embalagem</label>
+                        <select name="tipoEmbalagem" class="form-select">
+                            <option value="">Selecione...</option><option>Caixa Premium</option><option>Caixa Simples</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">Status Inicial</label>
+                        <select name="status" class="form-select">
+                            <option value="pendente">Pendente</option><option value="confirmado">Confirmado</option><option value="producao">Em Produção</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">Prioridade</label>
+                        <select name="prioridade" class="form-select">
+                            <option value="normal">Normal</option><option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">Responsável</label><input type="text" name="responsavel" class="form-input" placeholder="Nome do funcionário"></div>
+                    <div class="form-group full-width"><label class="form-label">Observações</label><textarea name="observacoes" class="form-textarea" placeholder="Informações adicionais sobre o pedido"></textarea></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Produtos e Valores</h3></div>
+            <div class="card-body">
+                <div id="produtosContainer">
+                    </div>
+                <button type="button" class="btn btn-secondary" onclick="adicionarProduto()">
+                    <i class="fas fa-plus"></i> Adicionar Produto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions-bottom">
+        <a href="/pedidos" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salvar Pedido</button>
+    </div>
+</form>
+
+<style>
+.form-sections { display: flex; flex-direction: column; gap: 1.5rem; }
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.form-group.full-width { grid-column: 1 / -1; }
+.produto-item { padding: 1rem; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 0.5rem; margin-bottom: 1rem; position: relative; }
+.produto-item .form-grid { grid-template-columns: repeat(4, 1fr); }
+.remove-produto-btn { position: absolute; top: 0.5rem; right: 0.5rem; }
+.form-actions-bottom { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-color); }
+@media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .produto-item .form-grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+// console.log("essa versao de novo pedido ja esta refatorada, modulada e pronta")
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('novoPedidoForm');
+    const produtosContainer = document.getElementById('produtosContainer');
+
+    window.adicionarProduto = function() {
+        const produtoItem = document.createElement('div');
+        produtoItem.className = 'produto-item';
+        produtoItem.innerHTML = `
+            <button type="button" class="btn-icon btn-danger remove-produto-btn" onclick="this.parentElement.remove()">
+                <i class="fas fa-trash"></i>
+            </button>
+            <div class="form-grid">
+                <div class="form-group"><label class="form-label">Produto</label><input type="text" class="form-input produto-nome" placeholder="Nome do produto"></div>
+                <div class="form-group"><label class="form-label">Quantidade</label><input type="number" class="form-input" min="1" value="1"></div>
+                <div class="form-group"><label class="form-label">Valor Unitário (R$)</label><input type="number" class="form-input" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group"><label class="form-label">Valor Total (R$)</label><input type="number" class="form-input valor-total" readonly></div>
+            </div>
+        `;
+        produtosContainer.appendChild(produtoItem);
+    }
+
+    // Adiciona a primeira linha ao carregar
+    adicionarProduto();
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            alert('Você precisa estar logado para criar um pedido.');
+            return;
+        }
+
+        const formData = new FormData(form);
+        const pedidoData = Object.fromEntries(formData.entries());
+
+        let totalQuantidade = 0;
+        const nomesProdutos = [];
+        document.querySelectorAll('.produto-item').forEach(item => {
+            const nome = item.querySelector('.produto-nome').value;
+            const qtd = parseInt(item.querySelectorAll('input[type="number"]')[0].value, 10) || 0;
+            
+            if (nome) {
+                nomesProdutos.push(nome);
+            }
+            totalQuantidade += qtd;
+        });
+
+        pedidoData.quantidade = totalQuantidade;
+        pedidoData.sabores = nomesProdutos.join(', ');
+
+        try {
+            const response = await fetch('/api/pedidos/cadastro', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-User-Id': userId
+                },
+                body: JSON.stringify(pedidoData)
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('Pedido salvo com sucesso!');
+                window.location.href = '/pedidos';
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            alert('Erro ao salvar pedido: ' + error.message);
+        }
+    });
+});
+</script>
+{% endblock %}

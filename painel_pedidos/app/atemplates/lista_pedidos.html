@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Pedidos - Divino Doces Finos ERP{% endblock %}
+
+{% block content %}
+    <div id="lista-pedidos">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Painel Geral de Pedidos</h2>
+        <div class="flex flex-wrap gap-4 mb-6">
+            <input type="text" id="filtro-cliente" placeholder="Filtrar por Cliente" class="input-field flex-grow">
+            <input type="date" id="filtro-data" placeholder="Filtrar por Data" class="input-field flex-grow">
+            <select id="filtro-status" class="input-field flex-grow">
+                <option value="">Todos os Status</option>
+                <option value="pendente">Pendente</option>
+                <option value="confirmado">Confirmado</option>
+                <option value="producao">Em Produção</option>
+            </select>
+            <button id="apply-filters-btn" class="btn-secondary">Aplicar Filtros</button>
+        </div>
+
+        <div class="overflow-x-auto rounded-lg shadow-md">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="table-header">Cliente</th>
+                        <th class="table-header">Data Evento</th>
+                        <th class="table-header">Tipo</th>
+                        <th class="table-header">Quantidade</th>
+                        <th class="table-header">Prioridade</th>
+                        <th class="table-header">Status</th>
+                        <th class="table-header">Ações</th>
+                        
+
+                    </tr>
+                </thead>
+                <tbody id="pedidos-table-body" class="bg-white divide-y divide-gray-200">
+                    <!-- O JavaScript vai preencher este corpo da tabela -->
+                </tbody>
+            </table>
+        </div>
+        <div id="no-pedidos-message" class="text-center text-gray-500 mt-4 hidden">Nenhum pedido encontrado.</div>
+    </div>
+
+    <!-- Popover de Detalhes do Pedido (escondido por padrão) -->
+    <div id="pedido-popover" class="absolute z-10 hidden bg-white p-4 rounded-lg shadow-lg border border-gray-200" style="min-width: 250px;">
+        <h4 class="font-bold text-gray-800 mb-2">Detalhes do Pedido</h4>
+        <p class="text-sm text-gray-700"><strong>Cliente:</strong> <span id="popover-cliente-nome"></span></p>
+        <p class="text-sm text-gray-700"><strong>Tipo:</strong> <span id="popover-tipo-pedido"></span></p>
+        <p class="text-sm text-gray-700"><strong>Quantidade:</strong> <span id="popover-quantidade"></span></p>
+        <p class="text-sm text-gray-700"><strong>Sabores:</strong> <span id="popover-sabores"></span></p>
+        <p class="text-sm text-gray-700"><strong>Retirada:</strong> <span id="popover-data-retirada"></span> às <span id="popover-horario-retirada"></span></p>
+        <p class="text-sm text-gray-700"><strong>Obs:</strong> <span id="popover-observacoes"></span></p>
+        <p class="text-xs text-gray-500 mt-2">Passe o mouse sobre a linha para ver mais detalhes.</p>
+    </div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios - Divino Doces Finos ERP{% endblock %}
+
+{% block content %}
+    <div id="relatorios">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Painel de Indicadores</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-blue-50 p-6 rounded-lg shadow-md text-center">
+                <h3 class="text-lg font-medium text-gray-700">Total de Pedidos (Mês)</h3>
+                <p id="total-pedidos-mes" class="text-4xl font-bold text-blue-600 mt-2">0</p>
+            </div>
+            <div class="bg-green-50 p-6 rounded-lg shadow-md text-center">
+                <h3 class="text-lg font-medium text-gray-700">Produtos Mais Pedidos</h3>
+                <p id="produtos-mais-pedidos" class="text-xl font-bold text-green-600 mt-2">N/A</p>
+            </div>
+            <div class="bg-purple-50 p-6 rounded-lg shadow-md text-center">
+                <h3 class="text-lg font-medium text-gray-700">Clientes com Mais Pedidos</h3>
+                <p id="clientes-mais-pedidos" class="text-xl font-bold text-purple-600 mt-2">N/A</p>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Evolução Semanal/Mensal (SIMULADO)</h3>
+            <!-- O elemento canvas para o gráfico Chart.js -->
+            <div class="relative h-64"> <!-- Adiciona altura para o canvas -->
+                <canvas id="evolucao-chart"></canvas>
+            </div>
+            <p class="text-center text-sm text-gray-500 mt-2">Gráfico de evolução de pedidos</p>
+        </div>
+    </div>
+{% endblock %}
