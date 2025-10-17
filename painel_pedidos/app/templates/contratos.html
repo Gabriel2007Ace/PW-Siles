@@ -224,6 +224,8 @@ async function salvarPedido() {
     };
 
     try {
+        // A rota para salvar um novo pedido ("/api/pedidos") já deve existir no seu 'pedidos/routes.py'.
+        // Estamos apenas garantindo que os dados enviados para ela estão no formato correto.
         const response = await fetch('/api/pedidos', {
             method:'POST',
             headers:{ 'Content-Type':'application/json', 'X-User-Id': userId },

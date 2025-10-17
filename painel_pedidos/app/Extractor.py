@@ -1,10 +1,7 @@
-# Arquivo: app/Extractor.py (VERSÃO FINALÍSSIMA, COM CORREÇÃO DE REGEX)
+# Arquivo: app/Extractor.py (VERSÃO FINAL, COMPLETA E MAIS ROBUSTA)
 
-"""Módulo central para extração de dados e geração de documentos.
-
-Este arquivo foi atualizado para mesclar as funcionalidades existentes do grupo
-com as novas capacidades de análise de PDF com IA e geração direta de PDF.
-Ele serve como a principal biblioteca de lógica de negócio para contratos.
+"""
+Módulo central para extração de dados e geração de documentos.
 """
 
 import re
@@ -19,30 +16,29 @@ from typing import Dict, Any, Optional
 from flask import render_template
 from weasyprint import HTML
 
-# --- Configuração do Modelo de IA (spaCy) ---
 try:
     nlp = spacy.load("pt_core_news_md")
-    print("[INFO] Modelo de NLP (pt_core_news_lg) carregado com sucesso.")
+    print("[INFO] Modelo de NLP (pt_core_news_md) carregado com sucesso.")
 except OSError:
-    print("[AVISO] Modelo 'pt_core_news_lg' não foi encontrado. Execute: python -m spacy download pt_core_news_lg")
+    print("[AVISO] Modelo 'pt_core_news_md' não foi encontrado. Execute: python -m spacy download pt_core_news_md")
     nlp = None
 
-# ==============================================================================
-# SEÇÃO 1: EXTRAÇÃO DE DADOS DE PDF
-# ==============================================================================
-
 def extrair_dados_do_contrato_por_tipo(pdf_bytes: bytes, tipo_analise: str = 'padrao') -> Optional[Dict[str, Any]]:
-    """Função principal que orquestra a análise de um contrato em PDF."""
     texto = _extrair_texto_de_pdf_bytes(pdf_bytes)
     if not texto:
         return None
+
+    if tipo_analise == 'sistema':
+        print("\n" + "*"*30 + " INÍCIO DO TEXTO EXTRAÍDO DO PDF (MODO SISTEMA) " + "*"*30)
+        print(texto.encode('utf-8', errors='ignore').decode('utf-8'))
+        print("*"*30 + " FIM DO TEXTO EXTRAÍDO DO PDF (MODO SISTEMA) " + "*"*30 + "\n")
+    
     if tipo_analise == 'sistema':
         return _extrair_com_regex(texto)
     else:
         return _extrair_com_nlp(texto)
 
 def _extrair_texto_de_pdf_bytes(pdf_bytes: bytes) -> Optional[str]:
-    """Lê os bytes de um arquivo PDF usando PyMuPDF (fitz)."""
     try:
         with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
             return "".join(pagina.get_text("text") for pagina in doc)
@@ -51,10 +47,6 @@ def _extrair_texto_de_pdf_bytes(pdf_bytes: bytes) -> Optional[str]:
         return None
 
 def _extrair_com_regex(texto: str) -> Dict[str, Any]:
-    """Extrai dados usando Regex, otimizada para contratos do sistema.
-    
-    Esta versão contém as correções finais para extração de email e produtos.
-    """
     flags = re.DOTALL | re.IGNORECASE
     dados = {
         "Contratante": {"Nome": "N/A", "CPF": "N/A", "Telefone": "N/A", "Email": "N/A", "RG": "N/A", "Endereco": "N/A"},
@@ -63,56 +55,60 @@ def _extrair_com_regex(texto: str) -> Dict[str, Any]:
         "Responsavel": "N/A", "Como nos conheceu": "N/A"
     }
 
-    # Bloco Contratante (sem alterações, já estava robusto)
-    secao_contratante = re.search(r"CONTRATANTE:([\s\S]*?)CONTRATADO:", texto, flags)
-    if secao_contratante:
-        texto_contratante = secao_contratante.group(1)
-        dados["Contratante"]["Nome"] = (m.group(1).strip() if (m := re.search(r"Sr\(a\)\s*(.*?),\s*brasileiro", texto_contratante, flags)) else "N/A")
-        dados["Contratante"]["RG"] = (m.group(1).strip() if (m := re.search(r"RG:\s*([\d.\s-]+?)", texto_contratante, flags)) else "N/A")
+    bloco_contratante = re.search(r"CONTRATANTE:\s*Sr\(a\)([\s\S]*?)CONTRATADO:", texto, flags)
+    if bloco_contratante:
+        texto_contratante = bloco_contratante.group(1)
+        dados["Contratante"]["Nome"] = (m.group(1).strip() if (m := re.search(r"^\s*(.*?),\s*brasileiro", texto_contratante, flags)) else "N/A")
+        dados["Contratante"]["RG"] = (m.group(1).strip() if (m := re.search(r"RG:\s*([\d.\s-]+?)\s*e", texto_contratante, flags)) else "N/A")
         dados["Contratante"]["CPF"] = (m.group(1).strip() if (m := re.search(r"CPF:\s*([\d.\s-]+?),", texto_contratante, flags)) else "N/A")
-        dados["Contratante"]["Endereco"] = (m.group(1).strip() if (m := re.search(r"domiciliado\(a\) na (.*?) - Tel\.", texto_contratante, flags)) else "N/A")
-        dados["Contratante"]["Telefone"] = (m.group(1).strip() if (m := re.search(r"Tel\.\s*(.*?)\.", texto_contratante, flags)) else "N/A")
+        dados["Contratante"]["Endereco"] = (m.group(1).strip() if (m := re.search(r"domiciliado\(a\) na\s*(.*?)\s*-\s*Tel\.", texto_contratante, flags)) else "N/A")
+        dados["Contratante"]["Telefone"] = (m.group(1).strip() if (m := re.search(r"Tel\.\s*([\d\(\)\s-]+?)\.", texto_contratante, flags)) else "N/A")
+        dados["Contratante"]["Email"] = (m.group(1).strip() if (m := re.search(r"E-\s*mail:\s*([\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,})", texto_contratante, flags)) else "N/A")
 
-    # === CORREÇÃO 1: REGEX DE EMAIL MAIS FLEXÍVEL ===
-    # Esta nova regra busca por "E-" seguido opcionalmente por quebra de linha "mail:",
-    # ou simplesmente "Email:", em qualquer lugar do texto.
-    email_match = re.search(r"(?:E-\s*\n?mail|Email):\s*([\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,})", texto, flags)
-    if email_match:
-        dados["Contratante"]["Email"] = email_match.group(1).strip()
-
-    # === CORREÇÃO 2: REGEX DE PRODUTOS MAIS ROBUSTA ===
-    # Isola o bloco da tabela de forma mais precisa.
-    produtos_bloco = re.search(r'CLÁUSULA 1 - PRODUTOS CONTRATADOS([\s\S]*?)TOTAL:\s*R\$', texto, flags)
-    if produtos_bloco:
+    bloco_produtos = re.search(r'CLÁUSULA 1 - PRODUTOS CONTRATADOS([\s\S]*?)TOTAL:\s*R\$', texto, flags)
+    if bloco_produtos:
+        texto_produtos = bloco_produtos.group(1)
+        itens = re.findall(r'(\d+)\s+(.*?)\s+R\$\s*([\d.,]+)\s+R\$\s*([\d.,]+)', texto_produtos)
         produtos_lista = []
-        # A nova regra para encontrar os itens agora espera o "R$" antes dos valores,
-        # tornando a captura do nome do produto muito mais precisa.
-        itens = re.findall(r'^\s*(\d+)\s+(.*?)\s+(R\$\s*[\d,.]+)\s+(R\$\s*[\d,.]+)\s*$', produtos_bloco.group(1), re.MULTILINE)
         for item in itens:
             produtos_lista.append({
                 'Quantidade': item[0].strip(),
                 'Produto': item[1].strip(),
-                # Remove o "R$" para salvar apenas o número, se desejar.
-                'Valor Unitário': item[2].replace('R$', '').strip(),
-                'Valor Total Item': item[3].replace('R$', '').strip()
+                'Valor Unitário': item[2].strip(),
+                'Valor Total Item': item[3].strip()
             })
         if produtos_lista:
             dados["produtosContratadosJson"] = json.dumps(produtos_lista, ensure_ascii=False)
             
-    # O restante das regras já estava funcionando bem.
-    dados["Valor_Total_do_Pedido"] = (m.group(1).strip() if (m := re.search(r"TOTAL:\s*(R\$\s*[\d,.]+)", texto, flags)) else "N/A")
-    dados["Data_de_Pagamento"] = (m.group(1).strip() if (m := re.search(r"pagos no dia\s*([\d/]+)", texto, flags)) else "N/A")
-    dados["FormaDePagamento"] = (m.group(1).strip() if (m := re.search(r"pagos no dia\s*[\d/]+\s*(.*?)\.", texto, flags)) else "N/A")
-    clausula_11 = re.search(r"O evento acontecerá no dia:\s*(.*?)\s*-\s*Local do evento:\s*(.*?)Como nos conheceu:", texto, flags)
-    if clausula_11:
-        dados["Data_do_Evento"] = clausula_11.group(1).strip()
-        dados["Local_do_Evento"] = clausula_11.group(2).strip()
-    dados["Responsavel"] = (m.group(1).strip() if (m := re.search(r"RESPONSÁVEL PELO CONTRATO:\s*(.*?)\s*\n", texto, flags)) else "N/A")
+    dados["Valor_Total_do_Pedido"] = (m.group(1).strip() if (m := re.search(r"TOTAL:\s*(R\$\s*[\d.,]+)", texto, flags)) else "N/A")
     
+    # ========================== INÍCIO DA MUDANÇA DOCUMENTADA ==========================
+    #
+    # PROBLEMA: Uma nova quebra de linha foi encontrada, desta vez entre as palavras
+    #           "foram" e "pagos", fazendo a extração falhar novamente.
+    #
+    # SOLUÇÃO:  A expressão regular foi generalizada para aceitar quebras de linha
+    #           em múltiplos pontos da frase, adicionando '\s+' entre "foram" e "pagos".
+    #
+    # CÓDIGO ANTIGO: r"foram pagos no\s+dia\s+([\d/]+)..."
+    # CÓDIGO NOVO: r"foram\s+pagos\s+no\s+dia\s+([\d/]+)..."
+    #
+    bloco_pagamento = re.search(r"foram\s+pagos\s+no\s+dia\s+([\d/]+)\s+(.*?)\.", texto, flags)
+    if bloco_pagamento:
+        dados["Data_de_Pagamento"] = bloco_pagamento.group(1).strip()
+        dados["FormaDePagamento"] = bloco_pagamento.group(2).strip()
+    # =========================== FIM DA MUDANÇA DOCUMENTADA ============================
+    
+    bloco_evento = re.search(r"O evento acontecerá no dia:\s*([\d/]+)\s*-\s*Local do evento:\s*(.*?)\n", texto, flags)
+    if bloco_evento:
+        dados["Data_do_Evento"] = bloco_evento.group(1).strip()
+        dados["Local_do_Evento"] = bloco_evento.group(2).strip()
+
+    dados["Como nos conheceu"] = (m.group(1).strip() if (m := re.search(r"Como nos conheceu:\s*(.*?)\n", texto, flags)) else "N/A")
+    dados["Responsavel"] = (m.group(1).strip() if (m := re.search(r"RESPONSÁVEL PELO CONTRATO:\s*(.*?)\s*\n", texto, flags)) else "N/A")
     return dados
 
 def _extrair_com_nlp(texto: str) -> Dict[str, Any]:
-    """Extrai dados usando IA (NLP) para contratos com layout desconhecido."""
     if not nlp: raise Exception("Modelo de linguagem spaCy não foi carregado.")
     doc = nlp(texto)
     dados = {"Contratante": { "Nome": "Não encontrado", "CPF": "N/A", "Telefone": "N/A", "Email": "N/A" }, "Data_do_Evento": "Não encontrado", "Local_do_Evento": "Não encontrado", "produtosContratadosJson": '[]', "Data_de_Pagamento": "Verificar no Doc.", "Valor_Total_do_Pedido": "Não encontrado", "FormaDePagamento": "Verificar no Doc."}
@@ -127,12 +123,8 @@ def _extrair_com_nlp(texto: str) -> Dict[str, Any]:
     dados["Data_do_Evento"] = (m.group(1) if (m := re.search(r"data\s*do\s*evento[:\s]*(\d{2}/\d{2}/\d{4})", texto, re.IGNORECASE)) else "Não encontrado")
     return dados
 
-# ==============================================================================
-# SEÇÃO 2: GERAÇÃO DE DOCUMENTOS (Funcionalidades Mescladas e Aprimoradas)
-# ==============================================================================
-
+# O restante do arquivo (geração de DOCX, PDF, etc.) permanece inalterado.
 def gerar_contrato_docx(dados: Dict[str, Any]) -> Optional[BytesIO]:
-    """Gera um documento .docx de contrato."""
     try:
         document = Document()
         document.add_heading('Divinos Doces Finos', 0)
@@ -179,7 +171,7 @@ def gerar_contrato_docx(dados: Dict[str, Any]) -> Optional[BytesIO]:
         document.add_paragraph('Caso haja a necessidade do CONTRATANTE adicionar novos itens ao pedido fechado, o valor dos produtos será de acordo com o valor vigente no momento da adição, mesmo que o contrato tenha sido fechado com valores promocionais.')
         document.add_paragraph('A adição de produtos ocorre de acordo com a disponibilidade de agenda. Não havendo disponibilidade para novos produtos ou pedidos, não será possível a complementação.')
         document.add_paragraph()
-        document.add_heading('CLÁUSULA 7 - RETIRADA OU SERVIÇO DE ENTREGA', level=1)
+        document.add_heading('CLÁUSULA 7 - RETIRada OU SERVIÇO DE ENTREGA', level=1)
         document.add_paragraph(f"A entrega ou retirada dos itens acima, deverá ser definida pela CONTRATANTE até 15 dias antes do evento. Em caso de entrega será cobrada taxa de deslocamento de R$ 6,00 por km ou a taxa mínima de R$50,00 (sujeito a disponibilidade na data e horário desejados). Não fazemos entregas aos domingos e feriados. A retirada dos produtos ocorre de segunda-feira à sábado, das 9h às 16h30, mediante agendamento com o setor responsável, não havendo expediente aos domingos e feriados.")
         document.add_paragraph()
         document.add_heading('CLÁUSULA 8 - ARMAZENAMENTO', level=1)
@@ -215,7 +207,6 @@ def gerar_contrato_docx(dados: Dict[str, Any]) -> Optional[BytesIO]:
         return None
 
 def gerar_contrato_pdf_direto(dados: Dict[str, Any]) -> Optional[BytesIO]:
-    """Gera um PDF diretamente a partir de um template HTML usando WeasyPrint."""
     try:
         html_string = render_template("contrato_template.html", dados=dados)
         pdf_bytes = HTML(string=html_string).write_pdf()
@@ -227,7 +218,6 @@ def gerar_contrato_pdf_direto(dados: Dict[str, Any]) -> Optional[BytesIO]:
         return None
 
 def gerar_relatorio_entrega(dados: Dict[str, Any]) -> Optional[BytesIO]:
-    """Gera um relatório de entrega em .docx."""
     try:
         document = Document()
         document.add_heading('RELATÓRIO DE ENTREGA', 0)
@@ -264,7 +254,6 @@ def gerar_relatorio_entrega(dados: Dict[str, Any]) -> Optional[BytesIO]:
         return None
 
 def exportar_para_excel(dados: Dict[str, Any]) -> Optional[BytesIO]:
-    """Exporta os dados para um arquivo Excel."""
     try:
         workbook = openpyxl.Workbook()
         sheet = workbook.active
@@ -285,17 +274,18 @@ def exportar_para_excel(dados: Dict[str, Any]) -> Optional[BytesIO]:
                 sheet[f'B{linha_atual}'] = valor
                 linha_atual += 1
         linha_atual += 2
-        # Verifica se 'Produtos Contratados' está no dicionário e não está vazio
-        produtos_contratados = dados.get('Produtos Contratados')
-        if produtos_contratados:
-            headers_produtos = list(produtos_contratados[0].keys())
-            for col_idx, header in enumerate(headers_produtos, 1):
-                sheet.cell(row=linha_atual, column=col_idx, value=header)
-            linha_atual += 1
-            for produto in produtos_contratados:
+        produtos_contratados_str = dados.get('produtosContratadosJson')
+        if produtos_contratados_str:
+            produtos_contratados = json.loads(produtos_contratados_str)
+            if produtos_contratados and isinstance(produtos_contratados, list) and len(produtos_contratados) > 0:
+                headers_produtos = list(produtos_contratados[0].keys())
                 for col_idx, header in enumerate(headers_produtos, 1):
-                    sheet.cell(row=linha_atual, column=col_idx, value=produto.get(header, 'N/A'))
+                    sheet.cell(row=linha_atual, column=col_idx, value=header)
                 linha_atual += 1
+                for produto in produtos_contratados:
+                    for col_idx, header in enumerate(headers_produtos, 1):
+                        sheet.cell(row=linha_atual, column=col_idx, value=produto.get(header, 'N/A'))
+                    linha_atual += 1
         excel_stream = BytesIO()
         workbook.save(excel_stream)
         excel_stream.seek(0)

@@ -7,8 +7,8 @@ from app import db
 from app.models import Pedido
 
 # --- IMPORTAÇÕES ATUALIZADAS ---
-# O erro "NameError: name 'Dict' is not defined" acontece porque as anotações de tipo
-# (type hints) como 'Dict' e 'Any' precisam ser importadas da biblioteca 'typing'.
+# Importamos 'Dict' e 'Any' para as anotações de tipo (type hints),
+# o que deixa o código mais claro para a equipe.
 from typing import Dict, Any
 
 # Importamos nossas novas e renomeadas funções do Extractor.py.
