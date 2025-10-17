@@ -21,7 +21,7 @@ from weasyprint import HTML
 
 # --- Configuração do Modelo de IA (spaCy) ---
 try:
-    nlp = spacy.load("pt_core_news_lg")
+    nlp = spacy.load("pt_core_news_md")
     print("[INFO] Modelo de NLP (pt_core_news_lg) carregado com sucesso.")
 except OSError:
     print("[AVISO] Modelo 'pt_core_news_lg' não foi encontrado. Execute: python -m spacy download pt_core_news_lg")
